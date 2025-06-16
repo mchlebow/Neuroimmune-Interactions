@@ -1,0 +1,36 @@
+import cv2
+import numpy as np
+
+def calculate_object_volume(image_path, pixel_size=1.0, slice_thickness=1.0):
+    """
+    Calculates the volume of an object in a binary image.
+    Assumes white object on black background.
+    Args:
+        image_path (str): Path to the image file.
+        pixel_size (float): Size of one pixel (e.g., in micrometers).
+        slice_thickness (float): Thickness of the image slice (for 3D stacks).
+    Returns:
+        float: Estimated volume of the object.
+    """
+    # Load image in grayscale
+    img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+    if img is None:
+        raise ValueError("Image not found or unable to load.")
+
+    # Threshold to binary
+    _, binary = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY)
+
+    # Count white pixels (object area)
+    object_pixels = np.sum(binary == 255)
+
+    # Calculate area (pixels * pixel_size^2)
+    area = object_pixels * (pixel_size ** 2)
+
+    # For a single 2D image, volume = area * slice_thickness
+    volume = area * slice_thickness
+
+    return volume
+
+# Example usage:
+# volume = calculate_object_volume('object_image.png', pixel_size=0.5, slice_thickness=1.0)
+# print(f"Estimated object volume: {volume} cubic units")
